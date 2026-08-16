@@ -1,0 +1,645 @@
+/* ================================
+   GLOBAL
+================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #000;
+  color: #fff;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+
+/* ================================
+   MAIN APP
+================================ */
+
+.app {
+  width: 100%;
+  min-height: 100vh;
+  background: #000;
+}
+
+
+/* ================================
+   NAVBAR
+================================ */
+
+nav {
+  width: 100%;
+  height: 90px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 7%;
+
+  background: #000;
+}
+
+.logo {
+  font-size: 38px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  color: #fff;
+
+  transition: 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.02);
+}
+
+
+/* ================================
+   HERO SECTION
+================================ */
+
+.hero {
+  width: 100%;
+
+  min-height: calc(100vh - 90px);
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px;
+}
+
+#tag {
+  font-size: 42px;
+  font-weight: 500;
+
+  margin-bottom: 50px;
+
+  text-align: center;
+}
+
+
+/* ================================
+   CATEGORY CARDS
+================================ */
+
+.cate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 20px;
+
+  flex-wrap: wrap;
+}
+
+.cate > div {
+  width: 190px;
+  height: 150px;
+
+  border: 1px solid #444;
+
+  border-radius: 18px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 15px;
+
+  cursor: pointer;
+
+  background: #0a0d0e;
+
+  transition: all 0.3s ease;
+}
+
+.cate > div:hover {
+  transform: translateY(-5px);
+
+  border-color: #777;
+
+  background: #111;
+}
+
+.cate svg {
+  font-size: 30px;
+}
+
+.cate span {
+  font-size: 16px;
+}
+
+
+/* ================================
+   CHAT PAGE
+================================ */
+
+.chat-container {
+  width: 86%;
+
+  max-width: 1100px;
+
+  margin: 30px auto 150px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 25px;
+}
+
+
+/* ================================
+   USER MESSAGE
+================================ */
+
+.user {
+  width: fit-content;
+
+  max-width: 75%;
+
+  margin-left: auto;
+
+  padding: 15px 20px;
+
+  border: 1px solid #444;
+
+  border-radius: 18px;
+
+  background: #0b0f10;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  font-size: 17px;
+
+  line-height: 1.5;
+
+  word-break: break-word;
+}
+
+
+/* Uploaded user image */
+
+.user-img {
+  width: 80px;
+
+  height: 80px;
+
+  object-fit: cover;
+
+  border-radius: 12px;
+
+  border: 1px solid #555;
+}
+
+
+/* ================================
+   AI RESPONSE
+================================ */
+
+.ai {
+  width: 100%;
+
+  min-height: 80px;
+
+  padding: 20px;
+
+  border: 1px solid #333;
+
+  border-radius: 18px;
+
+  background: #080b0c;
+
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: flex-start;
+
+  font-size: 17px;
+
+  line-height: 1.6;
+
+  overflow: hidden;
+}
+
+
+/* ================================
+   GENERATED AI IMAGE
+================================ */
+
+.ai-img {
+  display: block;
+
+  width: 100%;
+
+  max-width: 700px;
+
+  height: auto;
+
+  min-height: 300px;
+
+  object-fit: contain;
+
+  border-radius: 15px;
+
+  margin: 0 auto;
+
+  background: #111;
+}
+
+
+/* ================================
+   IMAGE LOADER
+================================ */
+
+.loader {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 7px;
+
+  width: 100%;
+
+  min-height: 60px;
+}
+
+.dot {
+  width: 10px;
+
+  height: 10px;
+
+  border-radius: 50%;
+
+  background: #fff;
+
+  animation: loading 1.4s infinite ease-in-out both;
+}
+
+.dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes loading {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+
+  40% {
+    transform: scale(1);
+  }
+}
+
+
+/* ================================
+   INPUT AREA
+================================ */
+
+.input-area {
+  position: fixed;
+
+  bottom: 25px;
+
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  width: 80%;
+
+  max-width: 900px;
+
+  z-index: 100;
+}
+
+
+/* Form */
+
+.input-area form {
+  width: 100%;
+
+  height: 65px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 8px 10px;
+
+  border: 1px solid #444;
+
+  border-radius: 35px;
+
+  background: #0b0f10;
+
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+
+/* ================================
+   ADD BUTTON
+================================ */
+
+#add {
+  width: 45px;
+
+  height: 45px;
+
+  flex-shrink: 0;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #1a1f20;
+
+  color: #fff;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  cursor: pointer;
+
+  font-size: 20px;
+
+  transition: 0.2s;
+}
+
+#add:hover {
+  background: #292f30;
+
+  transform: scale(1.05);
+}
+
+
+/* ================================
+   TEXT INPUT
+================================ */
+
+.input-area input {
+  flex: 1;
+
+  height: 100%;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  color: #fff;
+
+  font-size: 17px;
+
+  padding: 0 10px;
+}
+
+.input-area input::placeholder {
+  color: #888;
+}
+
+
+/* ================================
+   SEND BUTTON
+================================ */
+
+.input-area button[type="submit"] {
+  width: 45px;
+
+  height: 45px;
+
+  flex-shrink: 0;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #fff;
+
+  color: #000;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  cursor: pointer;
+
+  font-size: 18px;
+
+  transition: 0.2s;
+}
+
+.input-area button[type="submit"]:hover {
+  transform: scale(1.05);
+
+  background: #ddd;
+}
+
+
+/* ================================
+   POPUP MENU
+================================ */
+
+.select-up {
+  position: absolute;
+
+  bottom: 75px;
+
+  left: 0;
+
+  width: 200px;
+
+  padding: 8px;
+
+  border: 1px solid #444;
+
+  border-radius: 15px;
+
+  background: #101415;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+
+  z-index: 200;
+}
+
+
+/* Popup options */
+
+.select-up > div {
+  width: 100%;
+
+  padding: 12px 14px;
+
+  border-radius: 10px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.select-up > div:hover {
+  background: #1d2223;
+}
+
+.select-up svg {
+  font-size: 18px;
+}
+
+
+/* ================================
+   UPLOAD IMAGE
+================================ */
+
+.select-up {
+  color: #fff;
+
+  font-size: 15px;
+}
+
+
+/* ================================
+   RESPONSIVE
+================================ */
+
+@media (max-width: 768px) {
+
+  nav {
+    height: 75px;
+
+    padding: 0 5%;
+  }
+
+  .logo {
+    font-size: 30px;
+  }
+
+  #tag {
+    font-size: 30px;
+
+    margin-bottom: 35px;
+  }
+
+  .cate {
+    gap: 12px;
+  }
+
+  .cate > div {
+    width: 150px;
+
+    height: 125px;
+  }
+
+  .chat-container {
+    width: 92%;
+
+    margin-top: 20px;
+  }
+
+  .user {
+    max-width: 90%;
+
+    font-size: 15px;
+  }
+
+  .ai {
+    font-size: 15px;
+
+    padding: 15px;
+  }
+
+  .ai-img {
+    min-height: 200px;
+
+    max-width: 100%;
+  }
+
+  .input-area {
+    width: 92%;
+
+    bottom: 15px;
+  }
+
+  .input-area form {
+    height: 58px;
+  }
+
+  #add,
+  .input-area button[type="submit"] {
+    width: 40px;
+
+    height: 40px;
+  }
+}
+
+
+@media (max-width: 480px) {
+
+  .logo {
+    font-size: 26px;
+  }
+
+  #tag {
+    font-size: 25px;
+  }
+
+  .cate > div {
+    width: 140px;
+
+    height: 115px;
+  }
+
+  .user {
+    max-width: 95%;
+  }
+
+  .ai {
+    padding: 12px;
+  }
+
+  .input-area input {
+    font-size: 15px;
+  }
+}
