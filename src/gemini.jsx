@@ -1,44 +1,61 @@
+// ========================================
+// SMART AI BOT - GEMINI / OPENROUTER
+// ========================================
 
-
-
-
-import { prevUser } from "./context/UserContext";
-
-const API_KEY = "";
-
-const API_URL = "https://openrouter.ai/api/v1/chat/completions";
-
-export async function generateResponse() {
+export const generateResponse = async (
+  prompt,
+  image = null,
+  mimeType = null
+) => {
   try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "deepseek/deepseek-chat-v3-0324",
-        messages: [
-          {
-            role: "user",
-            content: prevUser.prompt,
-          },
-        ],
-      }),
-    });
+    console.log("================================");
+    console.log("📤 Sending request to backend...");
+    console.log("Prompt:", prompt);
+    console.log("Image:", image ? "YES ✅" : "NO");
+    console.log("MimeType:", mimeType);
+    console.log("================================");
+
+    const response = await fetch(
+      "http://localhost:5000/api/chat",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          prompt: prompt.trim(),
+          image: image || null,
+          mimeType: mimeType || null,
+        }),
+      }
+    );
 
     const data = await response.json();
 
-    console.log(data);
+    console.log("📥 Backend Response:", data);
 
     if (!response.ok) {
-      throw new Error(data.error?.message || "Something went wrong");
+      throw new Error(
+        data?.error || "Backend request failed"
+      );
     }
 
-    return data.choices[0].message.content;
-  } catch (error) {
-    console.log(error);
-    return error.message;
-  }
-}
+    if (!data.reply) {
+      throw new Error(
+        "AI response was empty"
+      );
+    }
 
+    return data.reply;
+
+  } catch (error) {
+    console.error(
+      "❌ generateResponse Error:",
+      error
+    );
+
+    throw error;
+  }
+};

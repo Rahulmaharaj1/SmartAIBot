@@ -1,33 +1,104 @@
 import React, { useContext } from "react";
-import { dataContext, prevUser } from "../context/UserContext";
+
+import {
+  dataContext,
+  prevUser,
+  user,
+} from "../context/UserContext";
 
 export default function Chat() {
-  const { result, loading, feature, genImgUrl } = useContext(dataContext);
+  const {
+    result,
+    loading,
+    feature,
+    genImgUrl,
+  } = useContext(dataContext);
 
-  return (
-    <div className="chat-page">
-      <div className="user">
-        {prevUser.imgUrl && (
-          <img src={prevUser.imgUrl} alt="Uploaded" className="user-img" />
-        )}
+  // =========================================
+  // CURRENT IMAGE
+  // =========================================
 
-        {prevUser.prompt && <span>{prevUser.prompt}</span>}
-      </div>
+  // New uploaded image ko priority do.
+  // Agar current image nahi hai to previous image use karo.
+  const uploadedImage =
+    user.imgUrl || prevUser.imgUrl;
 
-      <div className="ai">
-        {feature === "genImg" ? (
-          loading ? (
+  // =========================================
+  // GENERATED IMAGE
+  // =========================================
+
+  if (feature === "genImg") {
+    return (
+      <div className="chat-page">
+
+        {/* USER PROMPT */}
+        <div className="user">
+          {prevUser.prompt && (
+            <span>{prevUser.prompt}</span>
+          )}
+        </div>
+
+        {/* AI IMAGE */}
+        <div className="ai">
+
+          {loading ? (
             <div className="loader">
               <div className="dot"></div>
               <div className="dot"></div>
               <div className="dot"></div>
             </div>
           ) : genImgUrl ? (
-            <img src={genImgUrl} alt="Generated AI" className="ai-img" />
+            <img
+              src={genImgUrl}
+              alt="Generated AI"
+              className="ai-img"
+            />
           ) : (
             <span>No Image Generated</span>
-          )
-        ) : loading ? (
+          )}
+
+        </div>
+
+      </div>
+    );
+  }
+
+  // =========================================
+  // NORMAL CHAT / IMAGE ANALYSIS
+  // =========================================
+
+  return (
+    <div className="chat-page">
+
+      {/* =====================================
+          USER MESSAGE
+      ===================================== */}
+
+      <div className="user">
+
+        {/* UPLOADED IMAGE */}
+        {uploadedImage && (
+          <img
+            src={uploadedImage}
+            alt="Uploaded"
+            className="user-img"
+          />
+        )}
+
+        {/* USER PROMPT */}
+        {prevUser.prompt && (
+          <span>{prevUser.prompt}</span>
+        )}
+
+      </div>
+
+      {/* =====================================
+          AI RESPONSE
+      ===================================== */}
+
+      <div className="ai">
+
+        {loading ? (
           <div className="loader">
             <div className="dot"></div>
             <div className="dot"></div>
@@ -36,7 +107,9 @@ export default function Chat() {
         ) : (
           <span>{result}</span>
         )}
+
       </div>
+
     </div>
   );
 }

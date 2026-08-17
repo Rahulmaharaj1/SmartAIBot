@@ -7,6 +7,7 @@ import {
 } from "../context/UserContext";
 
 import { generateResponse } from "../gemini";
+import { query } from "../huggingFace";
 
 import "../App.css";
 
@@ -18,15 +19,7 @@ import { FaArrowUpLong } from "react-icons/fa6";
 
 import Chat from "./chat";
 
-import { query } from "../huggingFace";
-
-
 export default function Home() {
-
-  // ================================
-  // CONTEXT
-  // ================================
-
   const {
     startResult,
     setStartResult,
@@ -42,341 +35,354 @@ export default function Home() {
 
     setPrevInput,
 
-    result,
     setResult,
 
     loading,
     setLoading,
 
-    genImgUrl,
     setGenImgUrl,
-
   } = useContext(dataContext);
 
-
-  // ================================
+  // =========================================
   // GENERATE IMAGE
-  // ================================
+  // =========================================
 
   const handleGenerateImg = async () => {
-
-    // Empty input check
     if (!input.trim()) return;
 
     const prompt = input.trim();
 
     console.log("Image Prompt:", prompt);
 
-
-    // ================================
-    // SAVE USER PROMPT
-    // ================================
-
+    // Save prompt
     prevUser.prompt = prompt;
 
-
-    // ================================
-    // UI STATE
-    // ================================
-
+    // UI state
     setStartResult(true);
-
     setFeature("genImg");
-
     setLoading(true);
-
     setResult("");
-
     setGenImgUrl("");
-
     setPrevInput(prompt);
 
-
     try {
-
       console.log("Generating image:", prompt);
 
-
-      // ================================
-      // CALL HUGGING FACE
-      // ================================
-
+      // Call backend
       const blob = await query(prompt);
 
-
       console.log("Image Blob:", blob);
-
       console.log("Image Type:", blob.type);
-
       console.log("Image Size:", blob.size);
 
+      if (!blob || !blob.type.startsWith("image/")) {
+        throw new Error("Invalid image received from server");
+      }
 
-      // ================================
-      // BLOB → URL
-      // ================================
-
+      // Blob → browser URL
       const imageUrl = URL.createObjectURL(blob);
-
 
       console.log("Image URL:", imageUrl);
 
-
-      // ================================
-      // SAVE IMAGE URL
-      // ================================
-
+      // Show image
       setGenImgUrl(imageUrl);
-
-
     } catch (error) {
-
-      console.error(
-        "Image Generation Error:",
-        error
-      );
+      console.error("Image Generation Error:", error);
 
       setResult(
-        "❌ Image generation failed. Please try again."
+        `❌ Image generation failed: ${
+          error.message || "Please try again."
+        }`
       );
-
     } finally {
-
       setLoading(false);
-
       setInput("");
-
     }
-
   };
 
-
-  // ================================
+  // =========================================
   // CHAT SUBMIT
-  // ================================
+  // =========================================
 
-  const handleSubmit = async (e) => {
+ // =========================================
+// CHAT + IMAGE SUBMIT
+// =========================================
 
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
+  if (!input.trim()) return;
 
-    // Empty input
-    if (!input.trim()) return;
+  const prompt = input.trim();
 
+  console.log("================================");
+  console.log("💬 Chat Prompt:", prompt);
+  console.log(
+    "🖼️ Image:",
+    user.data ? "YES ✅" : "NO"
+  );
+  console.log(
+    "📷 MimeType:",
+    user.mimeType
+  );
+  console.log("================================");
 
-    // ================================
-    // SAVE USER DATA
-    // ================================
+  // =========================================
+  // SAVE USER MESSAGE
+  // =========================================
 
-    prevUser.prompt = input;
+  prevUser.prompt = prompt;
+  prevUser.data = user.data;
+  prevUser.mimeType = user.mimeType;
+  prevUser.imgUrl = user.imgUrl;
 
-    prevUser.data = user.data;
+  // =========================================
+  // UI STATE
+  // =========================================
 
-    prevUser.mimeType = user.mimeType;
+  setPrevInput(prompt);
 
-    prevUser.imgUrl = user.imgUrl;
+  setStartResult(true);
 
+  setFeature("chat");
 
-    // ================================
-    // UI
-    // ================================
+  setLoading(true);
 
-    setPrevInput(input);
+  setResult("");
 
-    setStartResult(true);
+  try {
+    let aiResponse;
 
-    setFeature("chat");
+    // =======================================
+    // IMAGE + TEXT
+    // =======================================
 
-    setLoading(true);
-
-    setResult("");
-
-
-    try {
-
-      // ================================
-      // GEMINI / OPENROUTER RESPONSE
-      // ================================
-
-      const aiResponse = await generateResponse();
-
-      setResult(aiResponse);
-
-    } catch (error) {
-
-      console.error(
-        "Chat Error:",
-        error
-      );
-
-      setResult(
-        "Something went wrong."
-      );
-
-    } finally {
-
-      setLoading(false);
-
-      setFeature("chat");
-
-      setInput("");
-
-
-      // ================================
-      // CLEAR CURRENT USER IMAGE
-      // ================================
-
-      user.data = null;
-
-      user.mimeType = null;
-
-      user.imgUrl = null;
-
-    }
-
-  };
-
-
-  // ================================
-  // IMAGE UPLOAD
-  // ================================
-
-  const handleImage = (e) => {
-
-    const file = e.target.files[0];
-
-
-    if (!file) return;
-
-
-    // Only image files
-    if (!file.type.startsWith("image/")) {
-
-      alert("Please select an image file.");
-
-      return;
-
-    }
-
-
-    console.log("Selected Image:", file);
-
-
-    // ================================
-    // FEATURE
-    // ================================
-
-    setFeature("uploadImg");
-
-
-    // ================================
-    // FILE READER
-    // ================================
-
-    const reader = new FileReader();
-
-
-    reader.onload = (event) => {
-
-      const base64 =
-        event.target.result.split(",")[1];
-
-
-      // ================================
-      // SAVE IMAGE DATA
-      // ================================
-
-      user.data = base64;
-
-      user.mimeType = file.type;
-
-      user.imgUrl =
-        `data:${file.type};base64,${base64}`;
-
+    if (user.data && user.mimeType) {
 
       console.log(
-        "Uploaded User Image:",
-        user
+        "🖼️ Sending IMAGE + PROMPT..."
       );
 
-    };
+      aiResponse = await generateResponse(
+        prompt,
+        user.data,
+        user.mimeType
+      );
 
+    }
 
-    reader.readAsDataURL(file);
+    // =======================================
+    // TEXT ONLY
+    // =======================================
 
-  };
+    else {
 
+      console.log(
+        "💬 Sending TEXT only..."
+      );
 
-  // ================================
-  // LOGO CLICK
-  // ================================
+      aiResponse = await generateResponse(
+        prompt
+      );
+    }
 
-  const handleLogoClick = () => {
+    console.log(
+      "✅ AI Response:",
+      aiResponse
+    );
 
-    setStartResult(false);
+    // =========================================
+    // SHOW AI RESPONSE
+    // =========================================
+
+    setResult(aiResponse);
+
+  } catch (error) {
+
+    console.error(
+      "❌ Chat Error:",
+      error
+    );
+
+    setResult(
+      `❌ ${
+        error.message ||
+        "Something went wrong."
+      }`
+    );
+
+  } finally {
+
+    setLoading(false);
 
     setFeature("chat");
-
-    setPopup(false);
 
     setInput("");
 
+    // =======================================
+    // DO NOT CLEAR prevUser
+    // =======================================
+
+    user.data = null;
+    user.mimeType = null;
+    user.imgUrl = null;
+  }
+};
+
+// =========================================
+// IMAGE UPLOAD
+// =========================================
+
+
+const handleImage = (e) => {
+  const file = e.target.files?.[0];
+
+  if (!file) return;
+
+  // =======================================
+  // VALIDATE IMAGE
+  // =======================================
+
+  if (!file.type.startsWith("image/")) {
+    alert("Please select a valid image file.");
+    return;
+  }
+
+  // =======================================
+  // SIZE LIMIT
+  // =======================================
+
+  const maxSize = 10 * 1024 * 1024;
+
+  if (file.size > maxSize) {
+    alert(
+      "Image size must be less than 10MB."
+    );
+    return;
+  }
+
+  console.log(
+    "🖼️ Selected Image:",
+    file
+  );
+
+  // =======================================
+  // READ IMAGE
+  // =======================================
+
+  const reader = new FileReader();
+
+  reader.onload = (event) => {
+
+    const result =
+      event.target?.result;
+
+    if (!result) return;
+
+    // =====================================
+    // BASE64
+    // =====================================
+
+    const base64 =
+      result.split(",")[1];
+
+    // =====================================
+    // SAVE IMAGE
+    // =====================================
+
+    user.data = base64;
+
+    user.mimeType =
+      file.type;
+
+    user.imgUrl =
+      result;
+
+    console.log(
+      "✅ Uploaded User Image:",
+      {
+        mimeType: user.mimeType,
+        imageSize: base64.length,
+        hasImage: !!user.data,
+      }
+    );
+
+    // =====================================
+    // IMPORTANT
+    // =====================================
+    // Image upload ke baad
+    // normal CHAT mode rahega
+
+    setFeature("chat");
+
+    // Chat screen show karo
+
+    setStartResult(true);
+
+    // Popup close
+
+    setPopup(false);
   };
 
+  reader.readAsDataURL(file);
 
-  // ================================
-  // SEND FORM
-  // ================================
+  // Same image dobara select karne ke liye
+
+  e.target.value = "";
+};
+
+  // =========================================
+  // LOGO CLICK
+  // =========================================
+
+  const handleLogoClick = () => {
+    setStartResult(false);
+    setFeature("chat");
+    setPopup(false);
+    setInput("");
+    setResult("");
+    setGenImgUrl("");
+  };
+
+  // =========================================
+  // FORM SUBMIT
+  // =========================================
 
   const handleFormSubmit = (e) => {
-
     e.preventDefault();
 
+    if (loading) return;
 
-    // Generate Image
     if (feature === "genImg") {
-
       handleGenerateImg();
-
-    }
-
-    // Normal Chat
-    else {
-
+    } else {
       handleSubmit(e);
-
     }
-
   };
 
-
-  // ================================
+  // =========================================
   // JSX
-  // ================================
+  // =========================================
 
   return (
-
     <div className="app">
 
-
-      {/* ==================================
+      {/* =====================================
           NAVBAR
-      ================================== */}
+      ===================================== */}
 
       <nav>
-
         <div
           className="logo"
           onClick={handleLogoClick}
         >
           Smart AI Bot
         </div>
-
       </nav>
 
-
-      {/* ==================================
+      {/* =====================================
           HIDDEN IMAGE INPUT
-      ================================== */}
+      ===================================== */}
 
       <input
         type="file"
@@ -386,158 +392,102 @@ export default function Home() {
         onChange={handleImage}
       />
 
-
-      {/* ==================================
+      {/* =====================================
           HOME / HERO
-      ================================== */}
+      ===================================== */}
 
       {!startResult ? (
-
         <div className="hero">
 
           <span id="tag">
             What Can I Help With ?
           </span>
 
-
-          {/* ==================================
-              CATEGORY BUTTONS
-          ================================== */}
-
           <div className="cate">
 
-
-            {/* ================================
-                UPLOAD IMAGE
-            ================================ */}
+            {/* UPLOAD IMAGE */}
 
             <div
               className="upImg"
               onClick={() => {
-
                 document
                   .getElementById("inputImg")
                   .click();
-
               }}
             >
-
               <RiImageAddLine />
 
               <span>
                 Upload Image
               </span>
-
             </div>
 
-
-            {/* ================================
-                GENERATE IMAGE
-            ================================ */}
+            {/* GENERATE IMAGE */}
 
             <div
               className="genImg"
               onClick={() => {
-
                 setFeature("genImg");
-
                 setStartResult(true);
-
               }}
             >
-
               <FaImage />
 
               <span>
                 Generate Image
               </span>
-
             </div>
 
-
-            {/* ================================
-                CHAT
-            ================================ */}
+            {/* CHAT */}
 
             <div
               className="chat"
               onClick={() => {
-
                 setFeature("chat");
-
                 setStartResult(true);
-
               }}
             >
-
               <IoChatbubbleOutline />
 
               <span>
                 Chat
               </span>
-
             </div>
 
           </div>
-
         </div>
-
       ) : (
-
-        /* ==================================
-           CHAT SCREEN
-        ================================== */
-
         <Chat />
-
       )}
 
-
-      {/* ==================================
+      {/* =====================================
           INPUT AREA
-      ================================== */}
+      ===================================== */}
 
       <div className="input-area">
 
-        <form
-          onSubmit={handleFormSubmit}
-        >
+        <form onSubmit={handleFormSubmit}>
 
-
-          {/* ==================================
-              ADD / FEATURE BUTTON
-          ================================== */}
+          {/* ADD BUTTON */}
 
           <button
             type="button"
             id="add"
+            disabled={loading}
             onClick={() => {
-
               setPopup(!popup);
-
             }}
           >
-
             {feature === "genImg" ? (
-
               <FaImage />
-
             ) : feature === "uploadImg" ? (
-
               <RiImageAddLine />
-
             ) : (
-
               <FiPlus />
-
             )}
-
           </button>
 
-
-          {/* ==================================
-              TEXT INPUT
-          ================================== */}
+          {/* TEXT INPUT */}
 
           <input
             type="text"
@@ -547,18 +497,15 @@ export default function Home() {
                 : "Ask me anything..."
             }
             value={input}
-            onChange={(e) =>
-              setInput(e.target.value)
-            }
+            disabled={loading}
+            onChange={(e) => {
+              setInput(e.target.value);
+            }}
           />
 
+          {/* SEND BUTTON */}
 
-          {/* ==================================
-              SEND BUTTON
-          ================================== */}
-
-          {input.trim() !== "" && (
-
+          {input.trim() !== "" && !loading && (
             <button
               type="submit"
               title={
@@ -567,110 +514,78 @@ export default function Home() {
                   : "Send"
               }
             >
-
               <FaArrowUpLong />
-
             </button>
-
           )}
 
-
-          {/* ==================================
+          {/* =================================
               POPUP MENU
-          ================================== */}
+          ================================= */}
 
           {popup && (
-
             <div className="select-up">
 
-
-              {/* ================================
-                  UPLOAD IMAGE
-              ================================ */}
+              {/* UPLOAD */}
 
               <div
                 className="select-upload"
                 onClick={() => {
-
                   setPopup(false);
-
                   setFeature("uploadImg");
 
                   document
                     .getElementById("inputImg")
                     .click();
-
                 }}
               >
-
                 <RiImageAddLine />
 
                 <span>
                   Upload Image
                 </span>
-
               </div>
 
-
-              {/* ================================
-                  GENERATE IMAGE
-              ================================ */}
+              {/* GENERATE IMAGE */}
 
               <div
                 className="select-gen"
                 onClick={() => {
-
                   setFeature("genImg");
-
                   setPopup(false);
-
+                  setStartResult(true);
                 }}
               >
-
                 <FaImage />
 
                 <span>
                   Generate Image
                 </span>
-
               </div>
 
-
-              {/* ================================
-                  CHAT
-              ================================ */}
+              {/* CHAT */}
 
               <div
                 className="select-chat"
                 onClick={() => {
-
                   setFeature("chat");
-
                   setPopup(false);
-
+                  setStartResult(true);
                 }}
               >
-
                 <IoChatbubbleOutline />
 
                 <span>
                   Chat
                 </span>
-
               </div>
 
-
             </div>
-
           )}
 
         </form>
 
       </div>
 
-
     </div>
-
   );
-
 }
