@@ -13,6 +13,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "https://rahulmaharaj1.github.io",
+      "https://smart-ai-bot-kappa.vercel.app",
     ],
   })
 );
@@ -42,7 +43,7 @@ app.get("/", (req, res) => {
 // CHAT + IMAGE ANALYSIS
 // ========================================
 
-app.post("/chat", async (req, res) => {
+app.post("/api/chat", async (req, res) => {
   try {
     const {
       prompt,
@@ -72,9 +73,7 @@ app.post("/chat", async (req, res) => {
     // ========================================
 
     if (!process.env.OPENROUTER_API_KEY) {
-      console.error(
-        "❌ OPENROUTER_API_KEY missing"
-      );
+      console.error("❌ OPENROUTER_API_KEY missing");
 
       return res.status(500).json({
         error: "OPENROUTER_API_KEY is missing",
@@ -92,9 +91,7 @@ app.post("/chat", async (req, res) => {
     // ========================================
 
     if (image && mimeType) {
-      console.log(
-        "🖼️ Image + Prompt request"
-      );
+      console.log("🖼️ Image + Prompt request");
 
       content = [
         {
@@ -115,9 +112,7 @@ app.post("/chat", async (req, res) => {
     // ========================================
 
     else {
-      console.log(
-        "💬 Text only request"
-      );
+      console.log("💬 Text only request");
 
       content = prompt.trim();
     }
@@ -126,9 +121,7 @@ app.post("/chat", async (req, res) => {
     // OPENROUTER
     // ========================================
 
-    console.log(
-      "🤖 Sending request to OpenRouter..."
-    );
+    console.log("🤖 Sending request to OpenRouter...");
 
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
@@ -143,14 +136,13 @@ app.post("/chat", async (req, res) => {
             "application/json",
 
           "HTTP-Referer":
-            "https://rahulmaharaj1.github.io/SmartAIBot/",
+            "https://smart-ai-bot-kappa.vercel.app/",
 
           "X-Title":
             "SmartAIBot",
         },
 
         body: JSON.stringify({
-          // Gemini Vision
           model: "google/gemini-2.5-flash",
 
           max_tokens: 2048,
@@ -240,7 +232,7 @@ app.post("/chat", async (req, res) => {
 // IMAGE GENERATION - HUGGING FACE
 // ========================================
 
-app.post("/image", async (req, res) => {
+app.post("/api/image", async (req, res) => {
   try {
     const {
       prompt,
