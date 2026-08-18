@@ -485,3 +485,23 @@ app.post("/api/image", async (req, res) => {
 // ========================================
 
 export default app;
+
+
+// ========================================
+// LOCAL DEVELOPMENT SERVER
+// ========================================
+
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
+
+  app.listen(PORT, () => {
+    console.log("");
+    console.log("================================");
+    console.log("🚀 SmartAIBot Backend Started");
+    console.log(`📡 http://localhost:${PORT}`);
+    console.log("🤖 Gemini Vision: ENABLED");
+    console.log("🎨 Image Generation: ENABLED");
+    console.log("================================");
+    console.log("");
+  });
+}
