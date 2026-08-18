@@ -16,7 +16,7 @@ export const generateResponse = async (
     console.log("================================");
 
     const response = await fetch(
-      "http://localhost:5000/api/chat",
+      "https://smart-ai-bot-kappa.vercel.app/api/chat",
       {
         method: "POST",
 

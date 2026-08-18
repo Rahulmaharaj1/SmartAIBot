@@ -1,18 +1,7 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
-
-// ========================================
-// LOAD ENV FROM PROJECT ROOT
-// ========================================
-
-dotenv.config({
-  path: "../.env",
-});
 
 const app = express();
-
-const PORT = process.env.PORT || 5000;
 
 // ========================================
 // CORS
@@ -79,11 +68,13 @@ app.post("/api/chat", async (req, res) => {
     }
 
     // ========================================
-    // CHECK OPENROUTER KEY
+    // CHECK API KEY
     // ========================================
 
     if (!process.env.OPENROUTER_API_KEY) {
-      console.error("❌ OPENROUTER_API_KEY missing");
+      console.error(
+        "❌ OPENROUTER_API_KEY missing"
+      );
 
       return res.status(500).json({
         error: "OPENROUTER_API_KEY is missing",
@@ -101,7 +92,9 @@ app.post("/api/chat", async (req, res) => {
     // ========================================
 
     if (image && mimeType) {
-      console.log("🖼️ Image + Prompt request");
+      console.log(
+        "🖼️ Image + Prompt request"
+      );
 
       content = [
         {
@@ -122,63 +115,58 @@ app.post("/api/chat", async (req, res) => {
     // ========================================
 
     else {
-      console.log("💬 Text only request");
+      console.log(
+        "💬 Text only request"
+      );
 
       content = prompt.trim();
     }
 
     // ========================================
-    // OPENROUTER REQUEST
+    // OPENROUTER
     // ========================================
 
-  // ========================================
-// OPENROUTER REQUEST
-// ========================================
+    console.log(
+      "🤖 Sending request to OpenRouter..."
+    );
 
-console.log("🤖 Sending request to OpenRouter...");
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
 
-const response = await fetch(
-  "https://openrouter.ai/api/v1/chat/completions",
-  {
-    method: "POST",
+        headers: {
+          Authorization:
+            `Bearer ${process.env.OPENROUTER_API_KEY}`,
 
-    headers: {
-      Authorization:
-        `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "Content-Type":
+            "application/json",
 
-      "Content-Type":
-        "application/json",
+          "HTTP-Referer":
+            "https://rahulmaharaj1.github.io/SmartAIBot/",
 
-      "HTTP-Referer":
-        "http://localhost:5173",
-
-      "X-Title":
-        "SmartAIBot",
-    },
-
-    body: JSON.stringify({
-      // ========================================
-      // GEMINI 2.5 FLASH - TEXT + IMAGE
-      // ========================================
-
-      model: "google/gemini-2.5-flash",
-
-      // Response token limit
-      // Image explanation ke liye 2048 enough hai
-      max_tokens: 2048,
-
-      messages: [
-        {
-          role: "user",
-          content: content,
+          "X-Title":
+            "SmartAIBot",
         },
-      ],
-    }),
-  }
-);
+
+        body: JSON.stringify({
+          // Gemini Vision
+          model: "google/gemini-2.5-flash",
+
+          max_tokens: 2048,
+
+          messages: [
+            {
+              role: "user",
+              content: content,
+            },
+          ],
+        }),
+      }
+    );
 
     // ========================================
-    // GET RESPONSE
+    // READ RESPONSE
     // ========================================
 
     const data = await response.json();
@@ -198,7 +186,9 @@ const response = await fetch(
         data
       );
 
-      return res.status(response.status).json({
+      return res.status(
+        response.status
+      ).json({
         error:
           data?.error?.message ||
           "OpenRouter request failed",
@@ -219,15 +209,14 @@ const response = await fetch(
       );
 
       return res.status(500).json({
-        error: "No AI response received",
+        error:
+          "No AI response received",
       });
     }
 
-    console.log("✅ AI Response received");
-
-    // ========================================
-    // SEND RESPONSE
-    // ========================================
+    console.log(
+      "✅ AI Response received"
+    );
 
     return res.json({
       reply: reply,
@@ -357,7 +346,7 @@ app.post("/api/image", async (req, res) => {
     }
 
     // ========================================
-    // CHECK RESPONSE TYPE
+    // RESPONSE TYPE
     // ========================================
 
     const contentType =
@@ -371,7 +360,7 @@ app.post("/api/image", async (req, res) => {
     );
 
     // ========================================
-    // DIRECT IMAGE RESPONSE
+    // DIRECT IMAGE
     // ========================================
 
     if (
@@ -468,7 +457,7 @@ app.post("/api/image", async (req, res) => {
       );
 
     // ========================================
-    // SEND IMAGE TO FRONTEND
+    // SEND IMAGE
     // ========================================
 
     res.setHeader(
@@ -500,31 +489,7 @@ app.post("/api/image", async (req, res) => {
 });
 
 // ========================================
-// START SERVER
+// VERCEL EXPORT
 // ========================================
 
-app.listen(
-  PORT,
-  () => {
-    console.log("");
-    console.log(
-      "================================"
-    );
-    console.log(
-      "🚀 SmartAIBot Backend Started"
-    );
-    console.log(
-      `📡 http://localhost:${PORT}`
-    );
-    console.log(
-      "🤖 Gemini Vision: ENABLED"
-    );
-    console.log(
-      "🎨 Image Generation: ENABLED"
-    );
-    console.log(
-      "================================"
-    );
-    console.log("");
-  }
-);
+export default app;

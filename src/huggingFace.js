@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api/image";
+const API_URL = "https://smart-ai-bot-kappa.vercel.app/api/image";
 
 export async function query(prompt) {
   if (!prompt || !prompt.trim()) {
