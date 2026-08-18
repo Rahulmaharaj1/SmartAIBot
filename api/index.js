@@ -42,7 +42,7 @@ app.get("/", (req, res) => {
 // CHAT + IMAGE ANALYSIS
 // ========================================
 
-app.post("/api/chat", async (req, res) => {
+app.post("/chat", async (req, res) => {
   try {
     const {
       prompt,
@@ -240,7 +240,7 @@ app.post("/api/chat", async (req, res) => {
 // IMAGE GENERATION - HUGGING FACE
 // ========================================
 
-app.post("/api/image", async (req, res) => {
+app.post("/image", async (req, res) => {
   try {
     const {
       prompt,
